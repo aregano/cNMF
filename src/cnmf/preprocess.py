@@ -230,7 +230,7 @@ class Preprocess():
         adata_RNA.layers['log1p_norm'] = adata_RNA.X
         
         if regression_vars is not None: # Added this code: aregano
-            sc.pp.regress_out(adata_RNA, regression_vars)
+            sc.pp.regress_out(adata_RNA, regression_vars, add_intercept=True)
             adata_RNA.layers['log1p_norm_regressed'] = adata_RNA.X
             
         adata_RNA, hvgs = self.normalize_batchcorrect(adata_RNA, harmony_vars=harmony_vars,
