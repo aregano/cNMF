@@ -230,11 +230,11 @@ class Preprocess():
         adata_RNA.layers['log1p_norm'] = adata_RNA.X
         
         if regression_vars is not None: # Added this code: aregano
+            sc.pp.log1p(adata_RNA)
             sc.pp.regress_out(adata_RNA, regression_vars, add_intercept=add_intercept)
             adata_RNA.X = adata_RNA.X - adata_RNA.X.min() # to avoid negative values after regression
-            # adata_RNA.X = np.log1p(adata_RNA.X) # log1p after regression to allow hvg seurat v3 format to work
             adata_RNA.X = csr_matrix(adata_RNA.X)
-            adata_RNA.layers['norm_regressed'] = adata_RNA.X
+            adata_RNA.layers['log1p_norm_regressed'] = adata_RNA.X
             
             
             
@@ -309,8 +309,8 @@ class Preprocess():
                 
         if n_top_genes is not None:
             sc.pp.highly_variable_genes(_adata, 
-                                        # flavor='seurat_v3', # throws errors due to regressed out matrix giving out a dense matrix as output
-                                        flavor = 'seurat',
+                                        flavor='seurat_v3', # throws errors due to regressed out matrix giving out a dense matrix as output
+                                        # flavor = 'seurat',
                                         n_top_genes=n_top_genes)
         elif 'highly_variable' not in _adata.var.columns:
             raise Exception("If a numeric value for n_top_genes is not provided, you must include a highly_variable column in _adata")                            
