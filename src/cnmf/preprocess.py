@@ -135,7 +135,7 @@ class Preprocess():
     def preprocess_for_cnmf(self, _adata, feature_type_col = None, adt_feature_name = 'Antibody Capture',
                             harmony_vars= None, n_top_rna_genes = 2000, librarysize_targetsum= 1e4,
                             max_scaled_thresh = None, quantile_thresh = .9999, makeplots=True, theta=1,
-                            regression_vars = None,
+                            regression_vars = None, add_intercept=False,
                             save_output_base=None, max_iter_harmony=20):
         """
         Runs minimal preprocessing for cNMF, specifically preparing an HVG filtered, normalized, optionally batch corrected, output file
@@ -230,8 +230,10 @@ class Preprocess():
         adata_RNA.layers['log1p_norm'] = adata_RNA.X
         
         if regression_vars is not None: # Added this code: aregano
-            sc.pp.regress_out(adata_RNA, regression_vars, add_intercept=True)
+            sc.pp.regress_out(adata_RNA, regression_vars, add_intercept=add_intercept)
+            adata_RNA.X = adata_RNA.X - adata_RNA.X.min() # to avoid negative values after regression
             adata_RNA.layers['log1p_norm_regressed'] = adata_RNA.X
+            
             
         adata_RNA, hvgs = self.normalize_batchcorrect(adata_RNA, harmony_vars=harmony_vars,
                                                 n_top_genes = n_top_rna_genes, 
