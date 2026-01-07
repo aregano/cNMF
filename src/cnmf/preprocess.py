@@ -135,6 +135,7 @@ class Preprocess():
     def preprocess_for_cnmf(self, _adata, feature_type_col = None, adt_feature_name = 'Antibody Capture',
                             harmony_vars= None, n_top_rna_genes = 2000, librarysize_targetsum= 1e4,
                             max_scaled_thresh = None, quantile_thresh = .9999, makeplots=True, theta=1,
+                            regression_vars = None,
                             save_output_base=None, max_iter_harmony=20):
         """
         Runs minimal preprocessing for cNMF, specifically preparing an HVG filtered, normalized, optionally batch corrected, output file
@@ -175,6 +176,9 @@ class Preprocess():
         makeplots : boolean (default=True)
         
         theta : float (default=1)
+        
+        regression_vars : list of strings (default=None)
+            If provided, regress out these variables from the RNA data prior to further normalization, the strings should indicate columns from adata.obs showing pct of expression in each cell 
         
         max_iter_harmony : int (default=20)
             Maximum number of Harmony iterations to use
@@ -223,6 +227,11 @@ class Preprocess():
 
         tp10k = adata_RNA.copy()
         sc.pp.normalize_total(tp10k, target_sum=librarysize_targetsum, copy=False)
+        
+        if regression_vars is not None: # Added this code: aregano
+            sc.pp.regress_out(adata_RNA, regression_vars)
+            adata_RNA.layers['log1p_norm_regressed'] = adata_RNA.X
+            
         adata_RNA, hvgs = self.normalize_batchcorrect(adata_RNA, harmony_vars=harmony_vars,
                                                 n_top_genes = n_top_rna_genes, 
                                                 librarysize_targetsum= librarysize_targetsum,
