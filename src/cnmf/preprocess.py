@@ -227,6 +227,7 @@ class Preprocess():
 
         tp10k = adata_RNA.copy()
         sc.pp.normalize_total(tp10k, target_sum=librarysize_targetsum, copy=False)
+        adata_RNA.layers['log1p_norm'] = adata_RNA.X
         
         if regression_vars is not None: # Added this code: aregano
             sc.pp.regress_out(adata_RNA, regression_vars)
