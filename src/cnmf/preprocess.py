@@ -230,11 +230,15 @@ class Preprocess():
         adata_RNA.layers['log1p_norm'] = adata_RNA.X
         
         if regression_vars is not None: # Added this code: aregano
+            sc.pp.normalize_total(adata_RNA, target_sum=librarysize_targetsum, copy=False)
             sc.pp.log1p(adata_RNA)
             sc.pp.regress_out(adata_RNA, regression_vars, add_intercept=add_intercept)
-            adata_RNA.X = adata_RNA.X - adata_RNA.X.min() # to avoid negative values after regression
-            adata_RNA.X = csr_matrix(adata_RNA.X)
+            # adata_RNA.X = adata_RNA.X - adata_RNA.X.min() # to avoid negative values after regression
+            adata_RNA.X = csr_matrix(adata_RNA.X) 
+            
             adata_RNA.layers['log1p_norm_regressed'] = adata_RNA.X
+            adata_RNA.X = np.expm1(adata_RNA.X)
+            adata_RNA.layers['norm_regressed'] = adata_RNA.X
             
             
             
