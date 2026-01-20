@@ -231,7 +231,10 @@ class Preprocess():
         if regression_vars is not None: # Added this code: aregano
             sc.pp.normalize_total(adata_RNA, target_sum=librarysize_targetsum, copy=False)
             sc.pp.log1p(adata_RNA)
-            sc.pp.regress_out(adata_RNA, regression_vars, add_intercept=add_intercept)
+            if add_intercept:
+                sc.pp.regress_out(adata_RNA, regression_vars, add_intercept=add_intercept) # modified regress_out function in scanpy to allow adding the intercept
+            else:
+                sc.pp.regress_out(adata_RNA, regression_vars)
             # adata_RNA.X = adata_RNA.X - adata_RNA.X.min() # to avoid negative values after regression
             adata_RNA.X = csr_matrix(adata_RNA.X) 
             
