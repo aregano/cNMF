@@ -236,11 +236,14 @@ class Preprocess():
             else:
                 sc.pp.regress_out(adata_RNA, regression_vars)
             # adata_RNA.X = adata_RNA.X - adata_RNA.X.min() # to avoid negative values after regression
-            adata_RNA.X = csr_matrix(adata_RNA.X) 
-            
-            adata_RNA.layers['log1p_norm_regressed'] = adata_RNA.X.copy()
+            adata_RNA.layers['log1p_norm_regressed'] = csr_matrix(adata_RNA.X.copy())
             adata_RNA.X = np.expm1(adata_RNA.X)
-            adata_RNA.layers['norm_regressed'] = adata_RNA.X.copy()
+            adata_RNA.layers['norm_regressed'] = csr_matrix(adata_RNA.X.copy())
+            
+            # Calculate original library sizes from the saved raw counts
+            original_lib_sizes = np.asarray(adata_RNA.layers['norm'].sum(axis=1)).squeeze()
+            scaling_factors = original_lib_sizes / librarysize_targetsum
+            adata_RNA.X = diags(scaling_factors) @ adata_RNA.layers['norm_regressed']
             
             
             
